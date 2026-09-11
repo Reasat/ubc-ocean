@@ -1,0 +1,24 @@
+{
+  "id": "reasat/maxvit-all-wsi-in-train",
+  "id_no": 45947020,
+  "title": "maxvit_all_wsi_in_train",
+  "code_file": "maxvit-all-wsi-in-train.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "keywords": [
+    "gpu"
+  ],
+  "dataset_sources": [
+    "jirkaborovec/tiles-of-ovarian-cancer-subtype",
+    "jirkaborovec/tiles-of-cancer-2048px-scale-0-25"
+  ],
+  "kernel_sources": [],
+  "competition_sources": [
+    "UBC-OCEAN"
+  ],
+  "model_sources": []
+}

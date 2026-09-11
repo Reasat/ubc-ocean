@@ -19,5 +19,10 @@
     "reasat/2023-12-09-17-07-51",
     "reasat/2023-12-14-20-32-38"
   ],
-  "note": "Official Kaggle kernels pull returns the latest kernel revision. This repo pins scriptVersionId 157255213, the selected medal submission."
+  "train_kernels": [
+    "reasat/maxvit-bow-train",
+    "reasat/maxvit-all-wsi-in-train"
+  ],
+  "tile_dataset": "jirkaborovec/tiles-of-cancer-2048px-scale-0-25",
+  "note": "Official Kaggle kernels pull returns the latest kernel revision. This repo pins scriptVersionId 157255213, the selected medal submission. TinyViT patch-clf train kernel was not found as a named notebook; weights are dataset-only."
 }
