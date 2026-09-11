@@ -1,0 +1,23 @@
+{
+  "competition_slug": "UBC-OCEAN",
+  "competition_title": "UBC Ovarian Cancer Subtype Classification and Outlier Detection (UBC-OCEAN)",
+  "medal": "silver",
+  "rank": 26,
+  "n_teams": 1326,
+  "awarded": "2024-01-03",
+  "team_name": "Tahsin",
+  "submitted_by": "reasat",
+  "certificate": "https://www.kaggle.com/certification/competitions/reasat/UBC-OCEAN",
+  "kernel": "reasat/bow-global-2023-12-14-20-32-38-with-other",
+  "script_version_id": 157255213,
+  "kernel_url": "https://www.kaggle.com/code/reasat/bow-global-2023-12-14-20-32-38-with-other?scriptVersionId=157255213",
+  "submission_description": "Notebook bow+global_2023-12-14-20-32-38_with_other | lowering max sample to evade timeout",
+  "public_score": "0.56",
+  "private_score": "0.53",
+  "submitted_at": "2024-01-01T01:15:38.890Z",
+  "weight_datasets": [
+    "reasat/2023-12-09-17-07-51",
+    "reasat/2023-12-14-20-32-38"
+  ],
+  "note": "Official Kaggle kernels pull returns the latest kernel revision. This repo pins scriptVersionId 157255213, the selected medal submission."
+}
