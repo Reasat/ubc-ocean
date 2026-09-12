@@ -1,49 +1,45 @@
-# UBC-OCEAN silver medal submission
+# UBC-OCEAN silver medal
 
-Inference notebook that scored **26th of 1326** (silver) in
-[UBC Ovarian Cancer Subtype Classification and Outlier Detection (UBC-OCEAN)](https://www.kaggle.com/competitions/UBC-OCEAN).
+Silver medal (26th of 1326) on [UBC Ovarian Cancer Subtype Classification and Outlier Detection](https://www.kaggle.com/competitions/UBC-OCEAN). Solo, January 2024.
 
-| | |
-| --- | --- |
-| Medal | Silver |
-| Private rank | 26 / 1326 |
-| Selected run | public 0.56, private 0.53 |
-| Awarded | 2024-01-03 |
-| Team | Tahsin (solo, `reasat`) |
-| Certificate | https://www.kaggle.com/certification/competitions/reasat/UBC-OCEAN |
+[Certificate](https://www.kaggle.com/certification/competitions/reasat/UBC-OCEAN)
 
-## What is in this repo
+The task is five ovarian-cancer subtypes (CC, EC, HGSC, LGSC, MC) on whole-slide images and TMAs, plus an `Other` class for outliers.
 
-### Submission (pinned medal version)
+## Method
 
-`submission/bow-global-2023-12-14-20-32-38-with-other.ipynb` is the **exact Kaggle kernel version that was selected**, not the later kernel revision.
+Two models, trained separately, composed only at inference. Not end-to-end.
 
-- Kernel: https://www.kaggle.com/code/reasat/bow-global-2023-12-14-20-32-38-with-other?scriptVersionId=157255213
-- `scriptVersionId`: `157255213`
-- Distinctive setting in this version: `MAX_SAMPLE_PER_IMAGE = 50` (a later version used 75 and timed out on rescoring)
+**Patch classifier (TinyViT).** 7-way tile classifier: the five tumor types plus Stroma and Necrosis. Used as a gate: keep tumor tiles, drop the rest.
 
-### Training notebooks
+**Bag-of-windows subtype model (MaxViT).** Shared `maxvit_tiny_tf_512` encoder over a bag of six 512px tiles plus the slide thumbnail. Concatenate features, adaptive avg+max pool, MLP → five subtype logits.
 
-These are the Lightning `trainer.fit` kernels on this account for UBC-OCEAN (both were private on Kaggle).
+### Inference
 
-| Path | Kaggle kernel | Role |
-| --- | --- | --- |
-| `train/maxvit-bow-train/` | [reasat/maxvit-bow-train](https://www.kaggle.com/code/reasat/maxvit-bow-train) | Bag-of-windows MaxViT on pre-extracted tiles |
-| `train/maxvit-all-wsi-in-train/` | [reasat/maxvit-all-wsi-in-train](https://www.kaggle.com/code/reasat/maxvit-all-wsi-in-train) | Earlier single-tile MaxViT baseline on the same tile dump |
+1. Load the slide (pyvips). Grid into tiles. Drop empty / mostly-white background.
+2. TinyViT scores each remaining tile. Keep only tumor classes.
+3. Pack kept tiles into bags of six. Encode bags with the thumbnail. Average bag logits → softmax → subtype. If no tiles survive, predict `Other`.
+4. TMAs: same bag path, then overwrite with TinyViT on the whole TMA (90/180/270° TTA). Stroma or Necrosis becomes `Other`.
 
-No named kernel was found for the TinyViT 7-class patch classifier. Its Lightning logs/checkpoint exist only as dataset [reasat/2023-12-09-17-07-51](https://www.kaggle.com/datasets/reasat/2023-12-09-17-07-51). The medal BOW checkpoint is a later 3-fold run stored as [reasat/2023-12-14-20-32-38](https://www.kaggle.com/datasets/reasat/2023-12-14-20-32-38); the closest matching train *code* is `maxvit-bow-train` (the inference graph later added a global-thumbnail branch).
+### Training
 
-Tile dump used in training: [jirkaborovec/tiles-of-cancer-2048px-scale-0-25](https://www.kaggle.com/datasets/jirkaborovec/tiles-of-cancer-2048px-scale-0-25). Starting point: [Jirka Borovec's Lightning+timm notebooks](https://www.kaggle.com/code/jirkaborovec/cancer-subtype-tiles-w-lightning-timm-models).
+The two networks were trained independently (not a two-stage train loop, not joint backprop).
 
-## Weights (not in git)
+- Patch classifier: tile-level 7-class training. Slide labels as weak tumor labels; Stroma/Necrosis for non-tumor tiles.
+- Subtype model: slide-level bags of six tiles (later run also used the thumbnail). Five-class labels from `train.csv`.
 
-Checkpoints stay on Kaggle. Do not commit `.ckpt` files.
+Weights stay on Kaggle:
 
-| Role | Kaggle dataset | Path used in the medal notebook |
-| --- | --- | --- |
-| Patch classifier | [reasat/2023-12-09-17-07-51](https://www.kaggle.com/datasets/reasat/2023-12-09-17-07-51) | `tiny_vit_21m_512.dist_in22k_ft_in1k/version_0/checkpoints/epoch=4-step=9925.ckpt` |
-| Bag-of-windows model | [reasat/2023-12-14-20-32-38](https://www.kaggle.com/datasets/reasat/2023-12-14-20-32-38) | `fold_0/maxvit_tiny_tf_512/version_0/checkpoints/epoch=99-step=3400.ckpt` |
+- Patch classifier: [reasat/2023-12-09-17-07-51](https://www.kaggle.com/datasets/reasat/2023-12-09-17-07-51)
+- Bag-of-windows model: [reasat/2023-12-14-20-32-38](https://www.kaggle.com/datasets/reasat/2023-12-14-20-32-38) (fold 0)
 
-Competition WSI images are the official `UBC-OCEAN` input; they are not copied here.
+Tiles for training came from [jirkaborovec/tiles-of-cancer-2048px-scale-0-25](https://www.kaggle.com/datasets/jirkaborovec/tiles-of-cancer-2048px-scale-0-25).
 
-See `provenance.json` for the machine-readable pin.
+## Code in this repo
+
+- `submission/` — selected inference notebook (the medal run).
+- `train/` — Lightning notebooks that the medal training code was based on.
+
+`train/maxvit-all-wsi-in-train/` is a single-tile baseline: one random tile per slide through a full MaxViT classifier.
+
+`train/maxvit-bow-train/` is a bag-of-windows trainer: six tiles per slide, shared MaxViT encoder, concat avg+max pool, 5-class head. The medal subtype run followed this setup (later adding a thumbnail branch and 3-fold training).
